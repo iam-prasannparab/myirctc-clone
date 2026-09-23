@@ -572,7 +572,7 @@ CMD ["catalina.sh", "run"]`;
                         <id>npm install</id>
                         <goals><goal>npm</goal></goals>
                         <phase>generate-resources</phase>
-                        <configuration><arguments>install</arguments></configuration>
+                        <configuration><arguments>install --legacy-peer-deps</arguments></configuration>
                     </execution>
                     <execution>
                         <id>npm run build</id>
