@@ -106,6 +106,7 @@ Implementation-Version: 1.0.0
 
   zip.folder('WEB-INF')?.file('web.xml', webXmlContent);
   zip.folder('META-INF')?.file('MANIFEST.MF', manifestContent);
+  zip.file('index.jsp', '<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>\n<jsp:forward page="index.html"/>\n');
 
   // 4. Generate WAR archive
   console.log('⚙️ Compressing files into WAR archive...');
