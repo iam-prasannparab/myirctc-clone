@@ -564,8 +564,8 @@ CMD ["catalina.sh", "run"]`;
                         <goals><goal>install-node-and-npm</goal></goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <nodeVersion>v20.11.0</nodeVersion>
-                            <npmVersion>10.2.4</npmVersion>
+                            <nodeVersion>v22.14.0</nodeVersion>
+                            <npmVersion>10.9.2</npmVersion>
                         </configuration>
                     </execution>
                     <execution>
