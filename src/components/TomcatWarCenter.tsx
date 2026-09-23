@@ -10,7 +10,10 @@ import {
   HelpCircle, 
   Layers, 
   FileText,
-  AlertCircle
+  AlertCircle,
+  Box,
+  FolderTree,
+  Hammer
 } from 'lucide-react';
 import { downloadTomcatWar, generateWebXml, generateManifest, WarGeneratorOptions } from '../utils/warPackager';
 
@@ -21,7 +24,7 @@ export const TomcatWarCenter: React.FC = () => {
   const [isPackaging, setIsPackaging] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState<{ filename: string; sizeKb: number } | null>(null);
   const [copiedSnippet, setCopiedSnippet] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'GENERATOR' | 'WEB_XML' | 'DEPLOY_GUIDE' | 'DOCKER'>('GENERATOR');
+  const [activeTab, setActiveTab] = useState<'GENERATOR' | 'MAVEN' | 'WEB_XML' | 'DEPLOY_GUIDE' | 'DOCKER'>('MAVEN');
 
   const contextPath = appName.toLowerCase() === 'root' ? '/' : `/${appName.toLowerCase().replace(/[^a-z0-9_-]/g, '')}`;
 
@@ -122,6 +125,18 @@ CMD ["catalina.sh", "run"]`;
           >
             <Layers className="w-3.5 h-3.5" />
             <span>WAR Generator</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('MAVEN')}
+            className={`px-3 py-1.5 rounded-md font-semibold transition-colors flex items-center gap-1.5 ${
+              activeTab === 'MAVEN'
+                ? 'bg-emerald-400 text-[#08284c] font-bold'
+                : 'text-emerald-300 hover:bg-white/10'
+            }`}
+          >
+            <Box className="w-3.5 h-3.5" />
+            <span>Maven Archetype (mvn)</span>
           </button>
 
           <button
@@ -347,7 +362,316 @@ CMD ["catalina.sh", "run"]`;
           </div>
         )}
 
-        {/* Tab 2: WEB-INF/web.xml Inspector */}
+        {/* Tab 2: Maven Archetype (mvn) & Project Structure */}
+        {activeTab === 'MAVEN' && (
+          <div className="space-y-6 text-xs text-slate-700">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-emerald-100 text-emerald-800">
+                  <Box className="w-5 h-5" />
+                </span>
+                <div>
+                  <h3 className="font-extrabold text-base text-slate-900">
+                    Maven Webapp Archetype (<code className="font-mono text-emerald-700">maven-archetype-webapp</code>)
+                  </h3>
+                  <p className="text-slate-500 text-xs">
+                    Standard Apache Maven archetype command to generate a Java Web Application directory structure for Apache Tomcat
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 1. The Exact Command Box */}
+            <div className="bg-slate-900 text-slate-100 rounded-xl p-5 font-mono space-y-3 border border-slate-800">
+              <div className="flex items-center justify-between text-slate-400 border-b border-slate-800 pb-2">
+                <span className="text-[11px] font-bold text-emerald-400">Standard Maven Archetype Command</span>
+                <button
+                  onClick={() => copyToClipboard(
+                    `mvn archetype:generate \\\n  -DgroupId=com.irctc.portal \\\n  -DartifactId=irctc-webapp \\\n  -DarchetypeArtifactId=maven-archetype-webapp \\\n  -DarchetypeVersion=1.4 \\\n  -DinteractiveMode=false`,
+                    'mvn-archetype'
+                  )}
+                  className="hover:text-white flex items-center gap-1.5 text-[11px] bg-slate-800 px-2.5 py-1 rounded transition-colors"
+                >
+                  {copiedSnippet === 'mvn-archetype' ? (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Command</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <pre className="text-emerald-300 text-xs sm:text-sm overflow-x-auto leading-relaxed">
+{`mvn archetype:generate \\
+  -DgroupId=com.irctc.portal \\
+  -DartifactId=irctc-webapp \\
+  -DarchetypeArtifactId=maven-archetype-webapp \\
+  -DarchetypeVersion=1.4 \\
+  -DinteractiveMode=false`}
+              </pre>
+            </div>
+
+            {/* 2. Flag & Parameter Breakdown */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+              <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wide flex items-center gap-1.5">
+                <Terminal className="w-4 h-4 text-[#213d77]" />
+                <span>Command Parameters Breakdown</span>
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="p-3 bg-white rounded-lg border border-slate-200">
+                  <span className="font-mono font-bold text-[#213d77] block mb-1">
+                    -DgroupId=com.irctc.portal
+                  </span>
+                  <p className="text-slate-600 text-[11px]">
+                    Identifies your project uniquely across all projects. Follows reverse domain package naming convention (e.g. <code className="font-mono">com.yourcompany.app</code>).
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white rounded-lg border border-slate-200">
+                  <span className="font-mono font-bold text-[#213d77] block mb-1">
+                    -DartifactId=irctc-webapp
+                  </span>
+                  <p className="text-slate-600 text-[11px]">
+                    The name of your project directory and default base name of the generated WAR archive (<code className="font-mono">irctc-webapp.war</code>).
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white rounded-lg border border-slate-200">
+                  <span className="font-mono font-bold text-emerald-700 block mb-1">
+                    -DarchetypeArtifactId=maven-archetype-webapp
+                  </span>
+                  <p className="text-slate-600 text-[11px]">
+                    The official Apache Maven archetype template that creates the Java Webapp directory skeleton with <code className="font-mono">src/main/webapp/WEB-INF/web.xml</code>.
+                  </p>
+                </div>
+
+                <div className="p-3 bg-white rounded-lg border border-slate-200">
+                  <span className="font-mono font-bold text-[#213d77] block mb-1">
+                    -DinteractiveMode=false
+                  </span>
+                  <p className="text-slate-600 text-[11px]">
+                    Non-interactive execution flag. Prevents Maven from pausing to prompt for user input, scaffolding the project immediately.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Directory Layout Explorer */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Left: Standard Archetype Output */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5 font-bold text-slate-900 text-xs">
+                  <FolderTree className="w-4 h-4 text-amber-600" />
+                  <span>A. Raw Archetype Output Structure</span>
+                </div>
+                <div className="bg-slate-900 text-slate-300 p-4 rounded-xl font-mono text-[11px] space-y-1">
+                  <p className="text-amber-400 font-bold">irctc-webapp/</p>
+                  <p className="pl-3 text-emerald-400">├── pom.xml</p>
+                  <p className="pl-3 text-slate-400">└── src/</p>
+                  <p className="pl-6 text-slate-400">└── main/</p>
+                  <p className="pl-9 text-slate-400">└── webapp/</p>
+                  <p className="pl-12 text-slate-400">├── WEB-INF/</p>
+                  <p className="pl-15 text-blue-300 font-bold">└── web.xml</p>
+                  <p className="pl-12 text-slate-400">└── index.jsp</p>
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  The default archetype comes with a placeholder <code className="font-mono">index.jsp</code>.
+                </p>
+              </div>
+
+              {/* Right: Modern Production Layout for IRCTC */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5 font-bold text-slate-900 text-xs">
+                  <FolderTree className="w-4 h-4 text-emerald-600" />
+                  <span>B. Production IRCTC Webapp Layout</span>
+                </div>
+                <div className="bg-slate-900 text-slate-300 p-4 rounded-xl font-mono text-[11px] space-y-1">
+                  <p className="text-white font-bold">irctc-webapp/</p>
+                  <p className="pl-3 text-emerald-400">├── pom.xml (frontend + war plugins)</p>
+                  <p className="pl-3 text-slate-400">├── package.json (React + Vite)</p>
+                  <p className="pl-3 text-amber-300">├── dist/ (compiled SPA bundle)</p>
+                  <p className="pl-3 text-slate-400">└── src/</p>
+                  <p className="pl-6 text-slate-400">└── main/</p>
+                  <p className="pl-9 text-slate-400">├── java/ (optional backend servlets)</p>
+                  <p className="pl-9 text-slate-400">└── webapp/</p>
+                  <p className="pl-12 text-slate-400">├── WEB-INF/</p>
+                  <p className="pl-15 text-blue-300 font-bold">└── web.xml (SPA 404 rewrite)</p>
+                  <p className="pl-12 text-slate-400">└── assets/</p>
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  Vite builds into <code className="font-mono">dist/</code> and Maven bundles everything into <code className="font-mono">target/irctc.war</code>.
+                </p>
+              </div>
+            </div>
+
+            {/* 4. Complete pom.xml snippet */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wide">
+                    Production pom.xml for Automated Frontend + WAR Packaging
+                  </h4>
+                  <p className="text-slate-500 text-[11px]">
+                    Includes <code className="font-mono text-emerald-700">frontend-maven-plugin</code> and <code className="font-mono text-emerald-700">maven-war-plugin</code> (also available at root <code className="font-mono">/pom.xml</code>)
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => copyToClipboard(
+                    `<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.irctc.portal</groupId>
+    <artifactId>irctc-webapp</artifactId>
+    <version>1.0.0</version>
+    <packaging>war</packaging>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <failOnMissingWebXml>false</failOnMissingWebXml>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>5.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>irctc</finalName>
+        <plugins>
+            <!-- 1. Auto-build frontend -->
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.15.0</version>
+                <executions>
+                    <execution>
+                        <id>install node and npm</id>
+                        <goals><goal>install-node-and-npm</goal></goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <nodeVersion>v20.11.0</nodeVersion>
+                            <npmVersion>10.2.4</npmVersion>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm install</id>
+                        <goals><goal>npm</goal></goals>
+                        <phase>generate-resources</phase>
+                        <configuration><arguments>install</arguments></configuration>
+                    </execution>
+                    <execution>
+                        <id>npm run build</id>
+                        <goals><goal>npm</goal></goals>
+                        <phase>compile</phase>
+                        <configuration><arguments>run build</arguments></configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 2. Package into irctc.war -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <warName>irctc</warName>
+                    <webResources>
+                        <resource>
+                            <directory>dist</directory>
+                            <targetPath>/</targetPath>
+                        </resource>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                            <targetPath>/</targetPath>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>`,
+                    'pom-xml'
+                  )}
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  {copiedSnippet === 'pom-xml' ? (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy pom.xml</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <pre className="bg-slate-900 text-slate-100 p-4 rounded-xl font-mono text-xs overflow-x-auto border border-slate-800 leading-relaxed max-h-72">
+{`<!-- Key plugins inside pom.xml -->
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-war-plugin</artifactId>
+    <version>3.4.0</version>
+    <configuration>
+        <warName>irctc</warName>
+        <webResources>
+            <resource>
+                <directory>dist</directory>
+                <targetPath>/</targetPath>
+            </resource>
+            <resource>
+                <directory>src/main/webapp</directory>
+                <targetPath>/</targetPath>
+            </resource>
+        </webResources>
+    </configuration>
+</plugin>`}
+              </pre>
+            </div>
+
+            {/* 5. Execution Workflow Steps */}
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
+              <h4 className="font-bold text-emerald-950 text-xs uppercase flex items-center gap-1.5">
+                <Hammer className="w-4 h-4 text-emerald-700" />
+                <span>Standard Maven Lifecycle Commands</span>
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
+                <div className="bg-white p-3 rounded-lg border border-emerald-100 space-y-1">
+                  <span className="font-mono font-bold text-emerald-800">1. Generate Archetype</span>
+                  <p className="text-slate-600">Run the <code className="font-mono">mvn archetype:generate</code> command above in your terminal.</p>
+                </div>
+                <div className="bg-white p-3 rounded-lg border border-emerald-100 space-y-1">
+                  <span className="font-mono font-bold text-emerald-800">2. Build WAR Package</span>
+                  <p className="text-slate-600">Run <code className="font-mono font-bold">mvn clean package</code>. Generates <code className="font-mono">target/irctc.war</code>.</p>
+                </div>
+                <div className="bg-white p-3 rounded-lg border border-emerald-100 space-y-1">
+                  <span className="font-mono font-bold text-emerald-800">3. Deploy to Tomcat</span>
+                  <p className="text-slate-600">Run <code className="font-mono font-bold">cp target/irctc.war $CATALINA_HOME/webapps/</code> and restart Tomcat!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: WEB-INF/web.xml Inspector */}
         {activeTab === 'WEB_XML' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
