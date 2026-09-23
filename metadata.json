@@ -1,0 +1,6 @@
+{
+  "name": "IRCTC NextGen Portal & Tomcat WAR Suite",
+  "description": "Authentic Indian Railways ticketing, PNR status, live train tracking, e-catering portal with one-click Apache Tomcat WAR export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
